@@ -461,7 +461,7 @@
                     </div>
                     <input type="number" min="0" step="100000" value="${u.balance}" 
                         style="width:130px;padding:8px 10px;background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;color:var(--accent2);font-weight:700;text-align:center;font-size:.9rem"
-                        onchange="adminApp.updateUserBalance('${u.name.replace(/'/g, "\\'") }', this.value)">
+                        onchange="adminApp.updateUserBalance('${u.name.replace(/'/g, "\\'")}', this.value)">
                     <button class="btn btn-sm btn-green" onclick="adminApp.updateUserBalance('${u.name.replace(/'/g, "\\'")}', this.previousElementSibling.value)" title="Lưu">💾</button>
                 </div>
             </div>`;
