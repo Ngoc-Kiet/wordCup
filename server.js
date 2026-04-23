@@ -122,10 +122,21 @@ async function handleAPI(req, res) {
         return sendJSON(res, readDB().users);
     }
 
-    if (pathname.startsWith('/api/users/') && method === 'GET') {
+    if (pathname.startsWith('/api/users/') && pathname !== '/api/users/login' && method === 'GET') {
         const userName = decodeURIComponent(pathname.replace('/api/users/', ''));
         const user = readDB().users.find(u => u.name.toLowerCase() === userName.toLowerCase());
         if (!user) return sendJSON(res, { error: 'Không tìm thấy' }, 404);
+        return sendJSON(res, user);
+    }
+
+    if (pathname.startsWith('/api/users/') && pathname !== '/api/users/login' && method === 'PUT') {
+        const userName = decodeURIComponent(pathname.replace('/api/users/', ''));
+        const { balance } = await parseBody(req);
+        const db = readDB();
+        const user = db.users.find(u => u.name.toLowerCase() === userName.toLowerCase());
+        if (!user) return sendJSON(res, { error: 'Không tìm thấy' }, 404);
+        if (balance !== undefined) user.balance = parseInt(balance) || 0;
+        writeDB(db);
         return sendJSON(res, user);
     }
 

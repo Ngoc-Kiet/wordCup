@@ -73,6 +73,7 @@
         renderAdminChampOdds();
         renderAdminSpecialOdds();
         renderAdminUserBets();
+        renderAdminUsers();
     }
 
     // --- PARTICLES ---
@@ -109,6 +110,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
         if (page === 'dashboard') renderDashboard();
         if (page === 'user-bets') renderAdminUserBets();
+        if (page === 'users') renderAdminUsers();
     }
 
     // --- ADMIN BUTTONS ---
@@ -417,6 +419,62 @@
         showToast('Đã xóa tất cả cược 🗑️', 'success');
     }
 
+    // --- USERS MANAGEMENT ---
+    async function renderAdminUsers() {
+        let users = [];
+        try { users = await API.getAllUsers(); } catch (e) { }
+        const summaryEl = document.getElementById('admin-users-summary');
+        const listEl = document.getElementById('admin-users-list');
+
+        const totalUsers = users.length;
+        const totalBalance = users.reduce((s, u) => s + (u.balance || 0), 0);
+
+        summaryEl.innerHTML = `
+            <div class="admin-summary-card"><div class="val">${totalUsers}</div><div class="lbl">Tổng người chơi</div></div>
+            <div class="admin-summary-card"><div class="val" style="color:var(--accent2)">${formatMoney(totalBalance)}</div><div class="lbl">Tổng số dư hệ thống</div></div>
+        `;
+
+        if (!users.length) {
+            listEl.innerHTML = '<p style="text-align:center;color:var(--text3);padding:2rem">Chưa có người dùng nào</p>';
+            return;
+        }
+
+        listEl.innerHTML = users.map(u => {
+            const bets = userBets.filter(b => b.userName && b.userName.toLowerCase() === u.name.toLowerCase());
+            const betCount = bets.length;
+            const won = bets.filter(b => b.status === 'won').length;
+            const lost = bets.filter(b => b.status === 'lost').length;
+            const pending = bets.filter(b => b.status === 'pending').length;
+            const joinDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString('vi-VN') : '';
+            return `
+            <div class="admin-bet-row" style="gap:1.2rem">
+                <div style="min-width:40px;text-align:center;font-size:2rem">👤</div>
+                <div style="flex:1;min-width:140px">
+                    <div style="font-weight:700;font-size:1rem">${u.name}</div>
+                    <div style="font-size:.75rem;color:var(--text3)">Đội: ${u.team || 'Chưa chọn'} • Tham gia: ${joinDate}</div>
+                    <div style="font-size:.75rem;color:var(--text3);margin-top:2px">🎲 ${betCount} cược • ✅ ${won} thắng • ❌ ${lost} thua • ⏳ ${pending} chờ</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <div style="text-align:right">
+                        <div style="font-size:.75rem;color:var(--text3)">Số dư hiện tại</div>
+                        <div style="font-weight:800;color:var(--accent2);font-size:1.1rem">${formatMoney(u.balance)} VNĐ</div>
+                    </div>
+                    <input type="number" min="0" step="100000" value="${u.balance}" 
+                        style="width:130px;padding:8px 10px;background:var(--bg3);border:1px solid var(--bg4);border-radius:8px;color:var(--accent2);font-weight:700;text-align:center;font-size:.9rem"
+                        onchange="adminApp.updateUserBalance('${u.name.replace(/'/g, "\\'") }', this.value)">
+                    <button class="btn btn-sm btn-green" onclick="adminApp.updateUserBalance('${u.name.replace(/'/g, "\\'")}', this.previousElementSibling.value)" title="Lưu">💾</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    async function updateUserBalance(name, value) {
+        const balance = parseInt(value) || 0;
+        await API.updateUserBalance(name, balance);
+        renderAdminUsers();
+        showToast(`Đã cập nhật số dư của ${name} thành ${formatMoney(balance)} VNĐ ✅`, 'success');
+    }
+
     // --- TOAST ---
     function showToast(msg, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -445,7 +503,7 @@
     }
 
     // --- EXPOSE API ---
-    window.adminApp = { deleteBet, updateBetStatus, updateBetAmount, logout: adminLogout };
+    window.adminApp = { deleteBet, updateBetStatus, updateBetAmount, updateUserBalance, logout: adminLogout };
 
     // --- START ---
     document.addEventListener('DOMContentLoaded', init);

@@ -26,6 +26,15 @@ const API = {
         return res.json();
     },
 
+    async updateUserBalance(name, balance) {
+        const res = await fetch(`${this.BASE}/api/users/${encodeURIComponent(name)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ balance })
+        });
+        return res.json();
+    },
+
     // --- BETS ---
     async getAllBets() {
         const res = await fetch(`${this.BASE}/api/bets`);
