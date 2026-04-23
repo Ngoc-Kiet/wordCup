@@ -6,10 +6,10 @@
 
     // --- STATE ---
     let allMatches = [];
-    let userBets = JSON.parse(localStorage.getItem('wc2026_bets')) || [];
-    let customMatchOdds = JSON.parse(localStorage.getItem('wc2026_custom_match_odds')) || {};
-    let customChampOdds = JSON.parse(localStorage.getItem('wc2026_custom_champ_odds')) || {};
-    let customSpecialOdds = JSON.parse(localStorage.getItem('wc2026_custom_special_odds')) || {};
+    let userBets = [];
+    let customMatchOdds = {};
+    let customChampOdds = {};
+    let customSpecialOdds = {};
 
     // --- INIT ---
     function init() {
@@ -54,10 +54,18 @@
         }
     }
 
-    function startAdmin() {
+    async function startAdmin() {
         document.getElementById('admin-login-overlay').classList.add('hidden');
         generateParticles();
         allMatches = [...generateGroupMatches(), ...generateKnockoutMatches(73)];
+        // Fetch data from server
+        try {
+            const odds = await API.getOdds();
+            customMatchOdds = odds.match || {};
+            customChampOdds = odds.champ || {};
+            customSpecialOdds = odds.special || {};
+            userBets = await API.getAllBets();
+        } catch(e) { console.warn('API unavailable'); }
         setupNavigation();
         setupAdminButtons();
         renderDashboard();
@@ -99,8 +107,6 @@
         document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
         document.querySelector('.nav').classList.remove('show');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        // Refresh data when navigating
-        userBets = JSON.parse(localStorage.getItem('wc2026_bets')) || [];
         if (page === 'dashboard') renderDashboard();
         if (page === 'user-bets') renderAdminUserBets();
     }
@@ -130,8 +136,8 @@
     }
 
     // --- DASHBOARD ---
-    function renderDashboard() {
-        userBets = JSON.parse(localStorage.getItem('wc2026_bets')) || [];
+    async function renderDashboard() {
+        try { userBets = await API.getAllBets(); } catch(e) {}
         const statsEl = document.getElementById('dashboard-stats');
         const recentEl = document.getElementById('dashboard-recent-bets');
 
@@ -228,7 +234,7 @@
         });
     }
 
-    function saveMatchOdds() {
+    async function saveMatchOdds() {
         document.querySelectorAll('#admin-match-list .admin-odds-row').forEach(row => {
             const mid = row.dataset.matchId;
             const inputs = row.querySelectorAll('input');
@@ -238,13 +244,13 @@
                 away: parseFloat(inputs[2].value) || 3.0
             };
         });
-        localStorage.setItem('wc2026_custom_match_odds', JSON.stringify(customMatchOdds));
+        await API.saveMatchOdds(customMatchOdds);
         showToast('Đã lưu tỷ lệ cược trận đấu! ✅', 'success');
     }
 
-    function resetMatchOdds() {
+    async function resetMatchOdds() {
         customMatchOdds = {};
-        localStorage.removeItem('wc2026_custom_match_odds');
+        await API.resetMatchOdds();
         renderAdminMatchOdds();
         showToast('Đã reset tỷ lệ trận đấu về mặc định 🔄', 'success');
     }
@@ -270,17 +276,17 @@
         }).join('');
     }
 
-    function saveChampOdds() {
+    async function saveChampOdds() {
         document.querySelectorAll('#admin-champ-list .admin-champ-input').forEach(inp => {
             customChampOdds[inp.dataset.team] = parseFloat(inp.value) || 10.0;
         });
-        localStorage.setItem('wc2026_custom_champ_odds', JSON.stringify(customChampOdds));
+        await API.saveChampOdds(customChampOdds);
         showToast('Đã lưu tỷ lệ cược vô địch! ✅', 'success');
     }
 
-    function resetChampOdds() {
+    async function resetChampOdds() {
         customChampOdds = {};
-        localStorage.removeItem('wc2026_custom_champ_odds');
+        await API.resetChampOdds();
         renderAdminChampOdds();
         showToast('Đã reset tỷ lệ vô địch về mặc định 🔄', 'success');
     }
@@ -314,25 +320,24 @@
         }).join('');
     }
 
-    function saveSpecialOdds() {
+    async function saveSpecialOdds() {
         document.querySelectorAll('#admin-special-list input[data-bet-id]').forEach(inp => {
             const key = inp.dataset.betId + '_' + inp.dataset.optIdx;
             customSpecialOdds[key] = parseFloat(inp.value) || 2.0;
         });
-        localStorage.setItem('wc2026_custom_special_odds', JSON.stringify(customSpecialOdds));
+        await API.saveSpecialOdds(customSpecialOdds);
         showToast('Đã lưu tỷ lệ cược đặc biệt! ✅', 'success');
     }
 
-    function resetSpecialOdds() {
+    async function resetSpecialOdds() {
         customSpecialOdds = {};
-        localStorage.removeItem('wc2026_custom_special_odds');
+        await API.resetSpecialOdds();
         renderAdminSpecialOdds();
         showToast('Đã reset tỷ lệ cược đặc biệt về mặc định 🔄', 'success');
     }
 
-    // --- USER BETS MANAGEMENT ---
-    function renderAdminUserBets() {
-        userBets = JSON.parse(localStorage.getItem('wc2026_bets')) || [];
+    async function renderAdminUserBets() {
+        try { userBets = await API.getAllBets(); } catch(e) {}
         const summaryEl = document.getElementById('admin-bets-summary');
         const listEl = document.getElementById('admin-bets-list');
 
@@ -364,7 +369,7 @@
                 `<option value="${s}" ${b.status === s ? 'selected' : ''}>${s === 'pending' ? 'Chờ KQ' : s === 'won' ? 'Thắng' : 'Thua'}</option>`
             ).join('');
             return `
-            <div class="admin-bet-row" data-idx="${i}" data-search-text="${userName} ${b.label} ${b.pick}">
+            <div class="admin-bet-row" data-idx="${i}" data-bet-id="${b.id}" data-search-text="${userName} ${b.label} ${b.pick}">
                 <div class="admin-bet-user">
                     <div class="admin-bet-user-name">👤 ${userName}</div>
                     <div class="admin-bet-user-time">${time}</div>
@@ -374,84 +379,40 @@
                     <div class="admin-bet-pick">Chọn: <strong style="color:var(--accent2)">${b.pick}</strong> (${b.odds}x)</div>
                 </div>
                 <div class="admin-bet-controls">
-                    <input type="number" min="10000" step="10000" value="${b.amount}" onchange="adminApp.updateBetAmount(${i}, this.value)" title="Số tiền cược">
-                    <select onchange="adminApp.updateBetStatus(${i}, this.value)" title="Trạng thái">
+                    <input type="number" min="10000" step="10000" value="${b.amount}" onchange="adminApp.updateBetAmount('${b.id}', this.value)" title="Số tiền cược">
+                    <select onchange="adminApp.updateBetStatus('${b.id}', this.value)" title="Trạng thái">
                         ${statusOpts}
                     </select>
-                    <button class="admin-bet-del" onclick="adminApp.deleteBet(${i})" title="Xóa cược">🗑️</button>
+                    <button class="admin-bet-del" onclick="adminApp.deleteBet('${b.id}')" title="Xóa cược">🗑️</button>
                 </div>
             </div>`;
         }).join('');
     }
 
-    function updateBetAmount(idx, value) {
-        userBets = JSON.parse(localStorage.getItem('wc2026_bets')) || [];
+    async function updateBetAmount(betId, value) {
         const amt = parseInt(value) || 0;
-        if (idx >= 0 && idx < userBets.length) {
-            const diff = userBets[idx].amount - amt;
-            userBets[idx].amount = amt;
-            // Update user balance
-            const user = JSON.parse(localStorage.getItem('wc2026_user'));
-            if (user) {
-                user.balance += diff;
-                localStorage.setItem('wc2026_user', JSON.stringify(user));
-            }
-            localStorage.setItem('wc2026_bets', JSON.stringify(userBets));
-            renderAdminUserBets();
-            showToast(`Đã cập nhật số tiền cược #${idx + 1}`, 'success');
-        }
+        await API.updateBet(betId, { amount: amt });
+        renderAdminUserBets();
+        showToast('Đã cập nhật số tiền cược', 'success');
     }
 
-    function updateBetStatus(idx, status) {
-        userBets = JSON.parse(localStorage.getItem('wc2026_bets')) || [];
-        if (idx >= 0 && idx < userBets.length) {
-            const oldStatus = userBets[idx].status;
-            userBets[idx].status = status;
-            const user = JSON.parse(localStorage.getItem('wc2026_user'));
-            if (user) {
-                if (oldStatus === 'pending' && status === 'won') {
-                    user.balance += userBets[idx].amount * userBets[idx].odds;
-                    showToast(`🎉 Cược #${idx + 1} THẮNG! +${formatMoney(userBets[idx].amount * userBets[idx].odds)} VNĐ`, 'success');
-                } else if (oldStatus === 'pending' && status === 'lost') {
-                    showToast(`😞 Cược #${idx + 1} thua`, 'error');
-                } else if (oldStatus === 'won' && status !== 'won') {
-                    user.balance -= userBets[idx].amount * userBets[idx].odds;
-                } else if (oldStatus !== 'won' && status === 'won') {
-                    user.balance += userBets[idx].amount * userBets[idx].odds;
-                }
-                localStorage.setItem('wc2026_user', JSON.stringify(user));
-            }
-            localStorage.setItem('wc2026_bets', JSON.stringify(userBets));
-            renderAdminUserBets();
-        }
+    async function updateBetStatus(betId, status) {
+        const result = await API.updateBet(betId, { status });
+        if (status === 'won') showToast('🎉 Cược THẮNG!', 'success');
+        else if (status === 'lost') showToast('😞 Cược thua', 'error');
+        renderAdminUserBets();
     }
 
-    function deleteBet(idx) {
-        userBets = JSON.parse(localStorage.getItem('wc2026_bets')) || [];
-        if (idx >= 0 && idx < userBets.length) {
-            const user = JSON.parse(localStorage.getItem('wc2026_user'));
-            if (user && userBets[idx].status === 'pending') {
-                user.balance += userBets[idx].amount;
-                localStorage.setItem('wc2026_user', JSON.stringify(user));
-            }
-            userBets.splice(idx, 1);
-            localStorage.setItem('wc2026_bets', JSON.stringify(userBets));
-            renderAdminUserBets();
-            showToast('Đã xóa cược ✅', 'success');
-        }
+    async function deleteBet(betId) {
+        await API.deleteBet(betId);
+        renderAdminUserBets();
+        showToast('Đã xóa cược ✅', 'success');
     }
 
-    function clearAllBets() {
-        userBets = JSON.parse(localStorage.getItem('wc2026_bets')) || [];
+    async function clearAllBets() {
         if (!userBets.length) return;
-        const user = JSON.parse(localStorage.getItem('wc2026_user'));
-        if (user) {
-            const refund = userBets.filter(b => b.status === 'pending').reduce((s, b) => s + b.amount, 0);
-            user.balance += refund;
-            localStorage.setItem('wc2026_user', JSON.stringify(user));
-        }
+        await API.clearAllBets();
         userBets = [];
-        localStorage.setItem('wc2026_bets', JSON.stringify(userBets));
         renderAdminUserBets();
         showToast('Đã xóa tất cả cược 🗑️', 'success');
     }

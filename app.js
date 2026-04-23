@@ -6,17 +6,30 @@
 
     // --- STATE ---
     let currentUser = JSON.parse(localStorage.getItem('wc2026_user')) || null;
-    let userBets = JSON.parse(localStorage.getItem('wc2026_bets')) || [];
+    let userBets = [];
     let allMatches = [];
     let selectedBet = null;
-    let customMatchOdds = JSON.parse(localStorage.getItem('wc2026_custom_match_odds')) || {};
-    let customChampOdds = JSON.parse(localStorage.getItem('wc2026_custom_champ_odds')) || {};
-    let customSpecialOdds = JSON.parse(localStorage.getItem('wc2026_custom_special_odds')) || {};
+    let customMatchOdds = {};
+    let customChampOdds = {};
+    let customSpecialOdds = {};
 
     // --- INIT ---
-    function init() {
+    async function init() {
         generateParticles();
         allMatches = [...generateGroupMatches(), ...generateKnockoutMatches(73)];
+        // Fetch shared data from server
+        try {
+            const odds = await API.getOdds();
+            customMatchOdds = odds.match || {};
+            customChampOdds = odds.champ || {};
+            customSpecialOdds = odds.special || {};
+            if (currentUser) {
+                const freshUser = await API.getUser(currentUser.name);
+                if (freshUser) currentUser = freshUser;
+                localStorage.setItem('wc2026_user', JSON.stringify(currentUser));
+                userBets = await API.getUserBets(currentUser.name);
+            }
+        } catch(e) { console.warn('API unavailable, using offline mode'); }
         setupNavigation();
         setupCountdown();
         renderFeaturedMatches();
@@ -345,20 +358,21 @@
     }
 
     // --- LEADERBOARD ---
-    function renderLeaderboard() {
-        const sorted = [...samplePlayers].sort((a, b) => b.profit - a.profit);
-        // Add current user if exists
-        if (currentUser && !sorted.find(p => p.name === currentUser.name)) {
-            const wins = userBets.filter(b => b.status === 'won').length;
-            sorted.push({
-                name: currentUser.name,
-                team: currentUser.team,
-                totalBets: userBets.length,
-                wins: wins,
-                losses: userBets.length - wins,
-                profit: currentUser.balance - 1000000
-            });
-            sorted.sort((a, b) => b.profit - a.profit);
+    async function renderLeaderboard() {
+        let sorted;
+        try {
+            sorted = await API.getLeaderboard();
+        } catch(e) {
+            sorted = [...samplePlayers].sort((a, b) => b.profit - a.profit);
+            if (currentUser && !sorted.find(p => p.name === currentUser.name)) {
+                const wins = userBets.filter(b => b.status === 'won').length;
+                sorted.push({
+                    name: currentUser.name, team: currentUser.team,
+                    totalBets: userBets.length, won: wins, lost: userBets.length - wins,
+                    profit: currentUser.balance - 1000000
+                });
+                sorted.sort((a, b) => b.profit - a.profit);
+            }
         }
 
         // Podium
@@ -384,8 +398,8 @@
                 <td>${p.name}</td>
                 <td>${WC2026.flags[p.team]||''} ${p.team}</td>
                 <td>${p.totalBets}</td>
-                <td style="color:var(--green)">${p.wins}</td>
-                <td style="color:var(--red)">${p.losses}</td>
+                <td style="color:var(--green)">${p.won || 0}</td>
+                <td style="color:var(--red)">${p.lost || 0}</td>
                 <td class="${p.profit >= 0 ? 'profit-pos' : 'profit-neg'}">${formatMoney(p.profit)}</td>
             </tr>
         `).join('');
@@ -433,16 +447,23 @@
         });
     }
 
-    function handleLogin() {
+    async function handleLogin() {
         const name = document.getElementById('login-name').value.trim();
         const team = document.getElementById('login-team').value;
         if (!name) { showToast('Vui lòng nhập tên!', 'error'); return; }
-        currentUser = { name, team, balance: 1000000 };
+        try {
+            currentUser = await API.login(name, team);
+        } catch(e) {
+            currentUser = { name, team, balance: 1000000 };
+        }
         localStorage.setItem('wc2026_user', JSON.stringify(currentUser));
+        userBets = await API.getUserBets(currentUser.name).catch(() => []);
         updateUserUI();
         hideModal('login-modal');
-        showToast(`Chào mừng ${name}! Bạn có 1,000,000 VNĐ để cá cược 🎉`, 'success');
+        showToast(`Chào mừng ${name}! Bạn có ${formatMoney(currentUser.balance)} VNĐ để cá cược 🎉`, 'success');
         renderLeaderboard();
+        renderBettingOverview();
+        renderBetHistory();
     }
 
     function updateUserUI() {
@@ -508,29 +529,37 @@
             <div class="row total"><span>Tiền thắng dự kiến:</span><span style="color:var(--green)">${formatMoney(potential)}</span></div>`;
     }
 
-    function placeBet() {
+    async function placeBet() {
         if (!selectedBet || !currentUser) return;
         const amount = parseInt(document.getElementById('bet-amount').value) || 0;
         if (amount < 10000) { showToast('Số tiền cược tối thiểu 10,000 VNĐ', 'error'); return; }
         if (amount > currentUser.balance) { showToast('Số dư không đủ!', 'error'); return; }
 
-        currentUser.balance -= amount;
-        localStorage.setItem('wc2026_user', JSON.stringify(currentUser));
+        try {
+            const result = await API.placeBet({
+                userName: currentUser.name,
+                label: selectedBet.label,
+                pick: selectedBet.pick,
+                odds: selectedBet.odds,
+                amount,
+                matchId: selectedBet.matchId,
+                type: selectedBet.type
+            });
+            if (result.error) { showToast(result.error, 'error'); return; }
+            currentUser.balance = result.balance;
+            localStorage.setItem('wc2026_user', JSON.stringify(currentUser));
+            userBets.push(result.bet);
+        } catch(e) {
+            currentUser.balance -= amount;
+            userBets.push({ ...selectedBet, amount, userName: currentUser.name, timestamp: Date.now(), status: 'pending' });
+        }
         updateUserUI();
-
-        userBets.push({
-            ...selectedBet,
-            amount,
-            userName: currentUser ? currentUser.name : 'Khách',
-            timestamp: Date.now(),
-            status: 'pending'
-        });
-        localStorage.setItem('wc2026_bets', JSON.stringify(userBets));
 
         hideModal('betslip-modal');
         showToast(`Đặt cược thành công! ${formatMoney(amount)} cho ${selectedBet.pick} 🎯`, 'success');
         selectedBet = null;
         renderMyBets();
+        renderBettingOverview();
     }
 
     // --- TOAST ---
