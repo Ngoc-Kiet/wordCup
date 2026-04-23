@@ -288,7 +288,8 @@ const server = http.createServer((req, res) => {
     }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
+const HOST = process.env.RAILWAY_ENVIRONMENT ? '0.0.0.0' : '0.0.0.0';
+server.listen(PORT, HOST, () => {
     console.log('');
     console.log('⚽ ========================================');
     console.log('   WC2026 BET - Server đang chạy!');
