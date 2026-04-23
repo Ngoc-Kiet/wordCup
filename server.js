@@ -263,7 +263,7 @@ async function handleAPI(req, res) {
             const won = myBets.filter(b => b.status === 'won').length;
             const lost = myBets.filter(b => b.status === 'lost').length;
             const profit = myBets.filter(b => b.status === 'won').reduce((s, b) => s + b.amount * b.odds - b.amount, 0)
-                         - myBets.filter(b => b.status === 'lost').reduce((s, b) => s + b.amount, 0);
+                - myBets.filter(b => b.status === 'lost').reduce((s, b) => s + b.amount, 0);
             return { name: u.name, team: u.team, balance: u.balance, totalBets, won, lost, profit };
         });
         board.sort((a, b) => b.profit - a.profit);
@@ -288,8 +288,7 @@ const server = http.createServer((req, res) => {
     }
 });
 
-const HOST = process.env.RAILWAY_ENVIRONMENT ? '0.0.0.0' : '0.0.0.0';
-server.listen(PORT, HOST, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log('');
     console.log('⚽ ========================================');
     console.log('   WC2026 BET - Server đang chạy!');

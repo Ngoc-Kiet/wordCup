@@ -1,7 +1,7 @@
 // ============================================================
 // WC2026 ADMIN - Admin Panel Application
 // ============================================================
-(function() {
+(function () {
     'use strict';
 
     // --- STATE ---
@@ -65,7 +65,7 @@
             customChampOdds = odds.champ || {};
             customSpecialOdds = odds.special || {};
             userBets = await API.getAllBets();
-        } catch(e) { console.warn('API unavailable'); }
+        } catch (e) { console.warn('API unavailable'); }
         setupNavigation();
         setupAdminButtons();
         renderDashboard();
@@ -82,7 +82,7 @@
             const p = document.createElement('div');
             p.className = 'particle';
             const size = Math.random() * 6 + 2;
-            p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*10}s;animation-duration:${10+Math.random()*15}s`;
+            p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random() * 100}%;top:${Math.random() * 100}%;animation-delay:${Math.random() * 10}s;animation-duration:${10 + Math.random() * 15}s`;
             c.appendChild(p);
         }
     }
@@ -137,7 +137,7 @@
 
     // --- DASHBOARD ---
     async function renderDashboard() {
-        try { userBets = await API.getAllBets(); } catch(e) {}
+        try { userBets = await API.getAllBets(); } catch (e) { }
         const statsEl = document.getElementById('dashboard-stats');
         const recentEl = document.getElementById('dashboard-recent-bets');
 
@@ -269,7 +269,7 @@
             const hasCustom = customChampOdds[t.team] !== undefined;
             return `
             <div class="admin-champ-card ${hasCustom ? 'modified' : ''}">
-                <span class="admin-champ-flag">${WC2026.flags[t.team]||'🏳️'}</span>
+                <span class="admin-champ-flag">${WC2026.flags[t.team] || '🏳️'}</span>
                 <div class="admin-champ-info"><div class="admin-champ-name">${t.team}</div></div>
                 <input class="admin-champ-input" type="number" step="0.1" min="1" value="${odds.toFixed(1)}" data-team="${t.team}">
             </div>`;
@@ -337,7 +337,7 @@
     }
 
     async function renderAdminUserBets() {
-        try { userBets = await API.getAllBets(); } catch(e) {}
+        try { userBets = await API.getAllBets(); } catch (e) { }
         const summaryEl = document.getElementById('admin-bets-summary');
         const listEl = document.getElementById('admin-bets-list');
 
@@ -430,8 +430,8 @@
     // --- UTILS ---
     function formatDate(dateStr) {
         const d = new Date(dateStr + 'T00:00:00');
-        const days = ['CN','T2','T3','T4','T5','T6','T7'];
-        return `${days[d.getDay()]}, ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+        const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        return `${days[d.getDay()]}, ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
     }
 
     function formatMoney(n) {

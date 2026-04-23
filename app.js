@@ -1,7 +1,7 @@
 // ============================================================
 // WC2026 BET - Main Application
 // ============================================================
-(function() {
+(function () {
     'use strict';
 
     // --- STATE ---
@@ -29,7 +29,7 @@
                 localStorage.setItem('wc2026_user', JSON.stringify(currentUser));
                 userBets = await API.getUserBets(currentUser.name);
             }
-        } catch(e) { console.warn('API unavailable, using offline mode'); }
+        } catch (e) { console.warn('API unavailable, using offline mode'); }
         setupNavigation();
         setupCountdown();
         renderFeaturedMatches();
@@ -56,7 +56,7 @@
             const p = document.createElement('div');
             p.className = 'particle';
             const size = Math.random() * 6 + 2;
-            p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*10}s;animation-duration:${10+Math.random()*15}s`;
+            p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random() * 100}%;top:${Math.random() * 100}%;animation-delay:${Math.random() * 10}s;animation-duration:${10 + Math.random() * 15}s`;
             c.appendChild(p);
         }
     }
@@ -102,10 +102,10 @@
             const h = Math.floor((diff % 86400000) / 3600000);
             const m = Math.floor((diff % 3600000) / 60000);
             const s = Math.floor((diff % 60000) / 1000);
-            document.getElementById('cd-days').textContent = String(d).padStart(2,'0');
-            document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
-            document.getElementById('cd-mins').textContent = String(m).padStart(2,'0');
-            document.getElementById('cd-secs').textContent = String(s).padStart(2,'0');
+            document.getElementById('cd-days').textContent = String(d).padStart(2, '0');
+            document.getElementById('cd-hours').textContent = String(h).padStart(2, '0');
+            document.getElementById('cd-mins').textContent = String(m).padStart(2, '0');
+            document.getElementById('cd-secs').textContent = String(s).padStart(2, '0');
         }
         update();
         setInterval(update, 1000);
@@ -215,10 +215,10 @@
             const odds = getChampOdds(t.team);
             return `
             <div class="favorite-card" onclick="app.betChampion('${t.team}',${odds})">
-                <div class="favorite-flag">${WC2026.flags[t.team]||'🏳️'}</div>
+                <div class="favorite-flag">${WC2026.flags[t.team] || '🏳️'}</div>
                 <div class="favorite-name">${t.team}</div>
                 <div class="favorite-odds">${odds.toFixed(1)}x</div>
-                <div class="favorite-rank">FIFA #${WC2026.rankings[t.team]||'-'}</div>
+                <div class="favorite-rank">FIFA #${WC2026.rankings[t.team] || '-'}</div>
             </div>`;
         }).join('');
     }
@@ -231,10 +231,10 @@
                 const posClass = i < 2 ? 'qualify' : (i === 2 ? 'maybe' : 'out');
                 return `
                 <div class="group-team">
-                    <span class="group-team-pos ${posClass}">${i+1}</span>
-                    <span class="group-team-flag">${WC2026.flags[t]||'🏳️'}</span>
+                    <span class="group-team-pos ${posClass}">${i + 1}</span>
+                    <span class="group-team-flag">${WC2026.flags[t] || '🏳️'}</span>
                     <span class="group-team-name">${t}</span>
-                    <span class="group-team-rank">#${WC2026.rankings[t]||'-'}</span>
+                    <span class="group-team-rank">#${WC2026.rankings[t] || '-'}</span>
                 </div>`;
             }).join('');
             return `
@@ -304,14 +304,14 @@
                 <div class="bet-option-desc">Chọn đội bạn tin sẽ giành chức vô địch</div>
                 <div class="bet-options-grid">
                     ${championshipOdds.map(t => {
-                        const odds = getChampOdds(t.team);
-                        return `
+            const odds = getChampOdds(t.team);
+            return `
                         <div class="bet-option" onclick="app.betChampion('${t.team}',${odds})">
-                            <div>${WC2026.flags[t.team]||'🏳️'}</div>
+                            <div>${WC2026.flags[t.team] || '🏳️'}</div>
                             <div class="bet-option-label">${t.team}</div>
                             <div class="bet-option-odds">${odds.toFixed(1)}x</div>
                         </div>`;
-                    }).join('')}
+        }).join('')}
                 </div>
             </div>`;
 
@@ -323,12 +323,13 @@
                 <div class="bet-option-desc">${sb.description}</div>
                 <div class="bet-options-grid">
                     ${sb.options.map((opt, oi) => {
-                        const odds = getSpecialOdds(sb.id, oi);
-                        return `
-                        <div class="bet-option" onclick="app.selectSpecialBet('${sb.id}','${opt.label.replace(/'/g,"\\'")}',${odds})">
+            const odds = getSpecialOdds(sb.id, oi);
+            return `
+                        <div class="bet-option" onclick="app.selectSpecialBet('${sb.id}','${opt.label.replace(/'/g, "\\'")}',${odds})">
                             <div class="bet-option-label">${opt.label}</div>
                             <div class="bet-option-odds">${odds.toFixed(1)}x</div>
-                        </div>`; }).join('')}
+                        </div>`;
+        }).join('')}
 
                 </div>
             </div>
@@ -362,7 +363,7 @@
         let sorted;
         try {
             sorted = await API.getLeaderboard();
-        } catch(e) {
+        } catch (e) {
             sorted = [...samplePlayers].sort((a, b) => b.profit - a.profit);
             if (currentUser && !sorted.find(p => p.name === currentUser.name)) {
                 const wins = userBets.filter(b => b.status === 'won').length;
@@ -378,8 +379,8 @@
         // Podium
         const podium = document.getElementById('leaderboard-podium');
         if (sorted.length >= 3) {
-            const medals = ['🥇','🥈','🥉'];
-            const classes = ['gold','silver','bronze'];
+            const medals = ['🥇', '🥈', '🥉'];
+            const classes = ['gold', 'silver', 'bronze'];
             const order = [1, 0, 2];
             podium.innerHTML = order.map(i => `
                 <div class="podium-item ${classes[i]}">
@@ -396,7 +397,7 @@
             <tr>
                 <td><strong>${i + 1}</strong></td>
                 <td>${p.name}</td>
-                <td>${WC2026.flags[p.team]||''} ${p.team}</td>
+                <td>${WC2026.flags[p.team] || ''} ${p.team}</td>
                 <td>${p.totalBets}</td>
                 <td style="color:var(--green)">${p.won || 0}</td>
                 <td style="color:var(--red)">${p.lost || 0}</td>
@@ -453,7 +454,7 @@
         if (!name) { showToast('Vui lòng nhập tên!', 'error'); return; }
         try {
             currentUser = await API.login(name, team);
-        } catch(e) {
+        } catch (e) {
             currentUser = { name, team, balance: 1000000 };
         }
         localStorage.setItem('wc2026_user', JSON.stringify(currentUser));
@@ -489,7 +490,7 @@
         if (!currentUser) { showLogin(); return; }
         selectedBet = {
             pick: team, odds,
-            label: `Vô địch: ${WC2026.flags[team]||''} ${team}`,
+            label: `Vô địch: ${WC2026.flags[team] || ''} ${team}`,
             category: 'outright'
         };
         showBetSlip();
@@ -549,7 +550,7 @@
             currentUser.balance = result.balance;
             localStorage.setItem('wc2026_user', JSON.stringify(currentUser));
             userBets.push(result.bet);
-        } catch(e) {
+        } catch (e) {
             currentUser.balance -= amount;
             userBets.push({ ...selectedBet, amount, userName: currentUser.name, timestamp: Date.now(), status: 'pending' });
         }
@@ -575,8 +576,8 @@
     // --- UTILS ---
     function formatDate(dateStr) {
         const d = new Date(dateStr + 'T00:00:00');
-        const days = ['CN','T2','T3','T4','T5','T6','T7'];
-        return `${days[d.getDay()]}, ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+        const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        return `${days[d.getDay()]}, ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
     }
 
     function formatMoney(n) {
@@ -595,7 +596,7 @@
         const won = userBets.filter(b => b.status === 'won').length;
         const lost = userBets.filter(b => b.status === 'lost').length;
         const profit = userBets.filter(b => b.status === 'won').reduce((s, b) => s + b.amount * b.odds - b.amount, 0)
-                     - userBets.filter(b => b.status === 'lost').reduce((s, b) => s + b.amount, 0);
+            - userBets.filter(b => b.status === 'lost').reduce((s, b) => s + b.amount, 0);
 
         overviewEl.innerHTML = `
             <div class="admin-summary-card"><div class="val">${total}</div><div class="lbl">Tổng cược</div></div>
@@ -620,7 +621,7 @@
         const won = userBets.filter(b => b.status === 'won').length;
         const lost = userBets.filter(b => b.status === 'lost').length;
         const profit = userBets.filter(b => b.status === 'won').reduce((s, b) => s + b.amount * b.odds - b.amount, 0)
-                     - userBets.filter(b => b.status === 'lost').reduce((s, b) => s + b.amount, 0);
+            - userBets.filter(b => b.status === 'lost').reduce((s, b) => s + b.amount, 0);
 
         statsEl.innerHTML = `
             <div class="admin-summary-card"><div class="val">${total}</div><div class="lbl">Tổng cược</div></div>
@@ -636,9 +637,9 @@
 
         if (!sorted.length) {
             const msg = filter === 'all' ? 'Bạn chưa đặt cược nào. Hãy bắt đầu! 🎯'
-                      : filter === 'pending' ? 'Không có cược nào đang chờ kết quả'
-                      : filter === 'won' ? 'Chưa có cược nào thắng'
-                      : 'Chưa có cược nào thua';
+                : filter === 'pending' ? 'Không có cược nào đang chờ kết quả'
+                    : filter === 'won' ? 'Chưa có cược nào thắng'
+                        : 'Chưa có cược nào thua';
             listEl.innerHTML = '<p style="text-align:center;color:var(--text3);padding:2rem">' + msg + '</p>';
             return;
         }
@@ -649,7 +650,7 @@
             const statusIcon = b.status === 'pending' ? '⏳' : b.status === 'won' ? '✅' : '❌';
             const statusText = b.status === 'pending' ? 'Chờ KQ' : b.status === 'won' ? 'Thắng' : 'Thua';
             const extra = b.status === 'pending' ? '<div style="font-size:.75rem;color:var(--text3)">→ ' + formatMoney(b.amount * b.odds) + ' VNĐ</div>'
-                        : b.status === 'won' ? '<div style="font-size:.75rem;color:var(--green)">+' + formatMoney(b.amount * b.odds) + ' VNĐ</div>' : '';
+                : b.status === 'won' ? '<div style="font-size:.75rem;color:var(--green)">+' + formatMoney(b.amount * b.odds) + ' VNĐ</div>' : '';
             return '<div class="admin-bet-row">'
                 + '<div style="font-size:1.5rem;min-width:36px;text-align:center">' + statusIcon + '</div>'
                 + '<div class="admin-bet-detail" style="flex:1">'

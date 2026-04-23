@@ -145,9 +145,9 @@ function generateGroupMatches() {
         // Round 2: 0v2, 1v3
         // Round 3: 0v3, 1v2
         const pairings = [
-            [[0,1],[2,3]],
-            [[0,2],[1,3]],
-            [[0,3],[1,2]]
+            [[0, 1], [2, 3]],
+            [[0, 2], [1, 3]],
+            [[0, 3], [1, 2]]
         ];
 
         pairings.forEach((round, rIdx) => {
