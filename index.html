@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Trang cá cược bóng đá World Cup 2026 nội bộ - Dự đoán kết quả trận đấu">
+    <title>⚽ WC2026 Bet - Cá Cược World Cup 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Particles Background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header / Navbar -->
+    <header class="header" id="header">
+        <div class="header-inner">
+            <div class="logo" id="logo">
+                <span class="logo-icon">⚽</span>
+                <div class="logo-text">
+                    <span class="logo-title">WC2026</span>
+                    <span class="logo-subtitle">BET</span>
+                </div>
+            </div>
+            <nav class="nav" id="main-nav">
+                <a href="#" class="nav-link active" data-page="home" id="nav-home">
+                    <span class="nav-icon">🏠</span> Trang chủ
+                </a>
+                <a href="#" class="nav-link" data-page="matches" id="nav-matches">
+                    <span class="nav-icon">📅</span> Lịch thi đấu
+                </a>
+                <a href="#" class="nav-link" data-page="groups" id="nav-groups">
+                    <span class="nav-icon">🏆</span> Bảng đấu
+                </a>
+                <a href="#" class="nav-link" data-page="betting" id="nav-betting">
+                    <span class="nav-icon">🎯</span> Đặt cược
+                </a>
+                <a href="#" class="nav-link" data-page="leaderboard" id="nav-leaderboard">
+                    <span class="nav-icon">👑</span> BXH Cá cược
+                </a>
+                <a href="#" class="nav-link" data-page="history" id="nav-history">
+                    <span class="nav-icon">📜</span> Lịch sử cược
+                </a>
+            </nav>
+            <div class="header-right">
+                <div class="user-balance" id="user-balance">
+                    <span class="balance-icon">💰</span>
+                    <span class="balance-amount" id="balance-amount">1,000,000</span>
+                    <span class="balance-currency">VNĐ</span>
+                </div>
+                <div class="user-profile" id="user-profile">
+                    <div class="avatar" id="user-avatar">👤</div>
+                    <span class="username" id="username">Khách</span>
+                </div>
+                <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="login-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>🔐 Đăng nhập</h2>
+                <button class="modal-close" id="login-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="login-name">Tên hiển thị</label>
+                    <input type="text" id="login-name" placeholder="Nhập tên của bạn..." maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label for="login-team">Đội yêu thích</label>
+                    <select id="login-team">
+                        <option value="">-- Chọn đội --</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-full" id="login-submit">
+                    🚀 Bắt đầu cá cược
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bet Slip Modal -->
+    <div class="modal-overlay" id="betslip-modal">
+        <div class="modal modal-betslip">
+            <div class="modal-header">
+                <h2>🎫 Phiếu cược</h2>
+                <button class="modal-close" id="betslip-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="betslip-content"></div>
+                <div class="form-group">
+                    <label for="bet-amount">Số tiền cược (VNĐ)</label>
+                    <input type="number" id="bet-amount" min="10000" step="10000" value="50000" placeholder="Nhập số tiền...">
+                    <div class="quick-amounts">
+                        <button class="quick-amt" data-amount="10000">10K</button>
+                        <button class="quick-amt" data-amount="50000">50K</button>
+                        <button class="quick-amt" data-amount="100000">100K</button>
+                        <button class="quick-amt" data-amount="500000">500K</button>
+                    </div>
+                </div>
+                <div class="bet-summary" id="bet-summary"></div>
+                <button class="btn btn-primary btn-full" id="place-bet-btn">
+                    ✅ Xác nhận đặt cược
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+
+        <!-- HOME PAGE -->
+        <section class="page active" id="page-home">
+            <!-- Hero Banner -->
+            <div class="hero" id="hero-banner">
+                <div class="hero-bg"></div>
+                <div class="hero-content">
+                    <div class="hero-badge">FIFA WORLD CUP 2026™</div>
+                    <h1 class="hero-title">
+                        <span class="gradient-text">Cá Cược</span> World Cup 2026
+                    </h1>
+                    <p class="hero-desc">
+                        🇺🇸 USA • 🇲🇽 Mexico • 🇨🇦 Canada<br>
+                        48 đội | 104 trận đấu | 16 thành phố<br>
+                        <strong>11/06 - 19/07/2026</strong>
+                    </p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary btn-lg" id="hero-bet-btn">
+                            🎯 Đặt cược ngay
+                        </button>
+                        <button class="btn btn-outline btn-lg" id="hero-schedule-btn">
+                            📅 Xem lịch thi đấu
+                        </button>
+                    </div>
+                </div>
+                <!-- Countdown -->
+                <div class="countdown" id="countdown">
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="cd-days">--</span>
+                        <span class="countdown-label">Ngày</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="cd-hours">--</span>
+                        <span class="countdown-label">Giờ</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="cd-mins">--</span>
+                        <span class="countdown-label">Phút</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="cd-secs">--</span>
+                        <span class="countdown-label">Giây</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Matches -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🔥 Trận đấu nổi bật</h2>
+                    <a href="#" class="section-link" data-page="matches">Xem tất cả →</a>
+                </div>
+                <div class="featured-matches" id="featured-matches"></div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="section">
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🏟️</div>
+                        <div class="stat-value">48</div>
+                        <div class="stat-label">Đội tuyển</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚽</div>
+                        <div class="stat-value">104</div>
+                        <div class="stat-label">Trận đấu</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏟️</div>
+                        <div class="stat-value">16</div>
+                        <div class="stat-label">Sân vận động</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🌎</div>
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Quốc gia</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Betting Overview -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📊 Tổng quan cược</h2>
+                </div>
+                <div class="admin-bets-summary" id="user-betting-overview"></div>
+            </div>
+
+            <!-- Top Favorites -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">⭐ Ứng cử viên vô địch</h2>
+                </div>
+                <div class="favorites-grid" id="favorites-grid"></div>
+            </div>
+        </section>
+
+        <!-- MATCHES PAGE -->
+        <section class="page" id="page-matches">
+            <div class="page-header">
+                <h1 class="page-title">📅 Lịch thi đấu World Cup 2026</h1>
+                <p class="page-desc">Toàn bộ lịch trình 104 trận đấu từ vòng bảng đến chung kết</p>
+            </div>
+            <div class="filter-bar" id="match-filters">
+                <button class="filter-btn active" data-filter="all">Tất cả</button>
+                <button class="filter-btn" data-filter="group">Vòng bảng</button>
+                <button class="filter-btn" data-filter="r32">Vòng 32</button>
+                <button class="filter-btn" data-filter="r16">Vòng 16</button>
+                <button class="filter-btn" data-filter="quarter">Tứ kết</button>
+                <button class="filter-btn" data-filter="semi">Bán kết</button>
+                <button class="filter-btn" data-filter="final">Chung kết</button>
+            </div>
+            <div class="matches-list" id="matches-list"></div>
+        </section>
+
+        <!-- GROUPS PAGE -->
+        <section class="page" id="page-groups">
+            <div class="page-header">
+                <h1 class="page-title">🏆 Bảng đấu World Cup 2026</h1>
+                <p class="page-desc">12 bảng đấu với 48 đội tuyển quốc gia</p>
+            </div>
+            <div class="groups-grid" id="groups-grid"></div>
+        </section>
+
+        <!-- BETTING PAGE -->
+        <section class="page" id="page-betting">
+            <div class="page-header">
+                <h1 class="page-title">🎯 Đặt cược</h1>
+                <p class="page-desc">Chọn trận đấu và dự đoán kết quả</p>
+            </div>
+            <div class="betting-tabs" id="betting-tabs">
+                <button class="betting-tab active" data-tab="match">Cược trận đấu</button>
+                <button class="betting-tab" data-tab="outright">Cược vô địch</button>
+                <button class="betting-tab" data-tab="special">Cược đặc biệt</button>
+            </div>
+            <div class="betting-content" id="betting-content">
+                <div class="betting-panel active" id="panel-match"></div>
+                <div class="betting-panel" id="panel-outright"></div>
+                <div class="betting-panel" id="panel-special"></div>
+            </div>
+            <!-- My Bets -->
+            <div class="section" style="margin-top:2rem">
+                <div class="section-header">
+                    <h2 class="section-title">📋 Lịch sử cược của tôi</h2>
+                </div>
+                <div id="my-bets-list" class="my-bets-list"></div>
+            </div>
+        </section>
+
+        <!-- LEADERBOARD PAGE -->
+        <section class="page" id="page-leaderboard">
+            <div class="page-header">
+                <h1 class="page-title">👑 Bảng xếp hạng</h1>
+                <p class="page-desc">Top người chơi có thành tích cá cược tốt nhất</p>
+            </div>
+            <div class="leaderboard-wrapper">
+                <div class="leaderboard-podium" id="leaderboard-podium"></div>
+                <div class="leaderboard-table-wrapper">
+                    <table class="leaderboard-table" id="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Hạng</th>
+                                <th>Người chơi</th>
+                                <th>Đội yêu thích</th>
+                                <th>Tổng cược</th>
+                                <th>Thắng</th>
+                                <th>Thua</th>
+                                <th>Lợi nhuận</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- HISTORY PAGE -->
+        <section class="page" id="page-history">
+            <div class="page-header">
+                <h1 class="page-title">📜 Lịch sử cược</h1>
+                <p class="page-desc">Toàn bộ lịch sử đặt cược của bạn</p>
+            </div>
+            <div class="admin-bets-summary" id="history-stats"></div>
+            <div class="filter-bar" id="history-filters">
+                <button class="filter-btn active" data-hfilter="all">Tất cả</button>
+                <button class="filter-btn" data-hfilter="pending">⏳ Chờ KQ</button>
+                <button class="filter-btn" data-hfilter="won">✅ Thắng</button>
+                <button class="filter-btn" data-hfilter="lost">❌ Thua</button>
+            </div>
+            <div class="admin-odds-list" id="history-bets-list"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="logo-icon">⚽</span>
+                <span>WC2026 BET</span>
+            </div>
+            <p class="footer-text">
+                Trang cá cược nội bộ - Chỉ dùng cho mục đích giải trí.<br>
+                Không sử dụng tiền thật. © 2026 Internal Use Only.
+            </p>
+            <div class="footer-links">
+                <span>🇺🇸 USA</span>
+                <span>🇲🇽 Mexico</span>
+                <span>🇨🇦 Canada</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

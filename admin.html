@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Trang quản trị - WC2026 Bet">
+    <title>⚙️ WC2026 Admin - Quản lý cá cược</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Admin Login Overlay -->
+    <div class="admin-login-overlay" id="admin-login-overlay">
+        <div class="admin-login-box">
+            <div class="admin-login-icon">🔐</div>
+            <h2 class="admin-login-title">Đăng nhập Admin</h2>
+            <p class="admin-login-desc">Vui lòng đăng nhập để truy cập trang quản trị</p>
+            <div class="admin-login-form">
+                <div class="form-group">
+                    <label for="admin-username">Tên đăng nhập</label>
+                    <input type="text" id="admin-username" placeholder="Nhập username..." autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Mật khẩu</label>
+                    <input type="password" id="admin-password" placeholder="Nhập mật khẩu...">
+                </div>
+                <div class="admin-login-error" id="admin-login-error" style="display:none">
+                    ❌ Sai tên đăng nhập hoặc mật khẩu!
+                </div>
+                <button class="btn btn-primary btn-full" id="admin-login-btn">
+                    🔓 Đăng nhập
+                </button>
+            </div>
+            <a href="index.html" class="admin-login-back">← Quay lại trang người dùng</a>
+        </div>
+    </div>
+
+    <!-- Particles Background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header / Navbar -->
+    <header class="header" id="header">
+        <div class="header-inner">
+            <div class="logo" id="logo">
+                <span class="logo-icon">⚙️</span>
+                <div class="logo-text">
+                    <span class="logo-title">WC2026</span>
+                    <span class="logo-subtitle">ADMIN</span>
+                </div>
+            </div>
+            <nav class="nav" id="main-nav">
+                <a href="#" class="nav-link active" data-page="dashboard" id="nav-dashboard">
+                    <span class="nav-icon">📊</span> Tổng quan
+                </a>
+                <a href="#" class="nav-link" data-page="match-odds" id="nav-match-odds">
+                    <span class="nav-icon">⚽</span> Cược trận đấu
+                </a>
+                <a href="#" class="nav-link" data-page="champ-odds" id="nav-champ-odds">
+                    <span class="nav-icon">🏆</span> Cược vô địch
+                </a>
+                <a href="#" class="nav-link" data-page="special-odds" id="nav-special-odds">
+                    <span class="nav-icon">🎭</span> Cược đặc biệt
+                </a>
+                <a href="#" class="nav-link" data-page="user-bets" id="nav-user-bets">
+                    <span class="nav-icon">📋</span> Cược người dùng
+                </a>
+            </nav>
+            <div class="header-right">
+                <a href="index.html" class="btn btn-sm btn-outline" id="back-to-user">
+                    🌐 Trang người dùng
+                </a>
+                <button class="btn btn-sm btn-red" onclick="adminApp.logout()">
+                    🚪 Đăng xuất
+                </button>
+                <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+
+        <!-- DASHBOARD PAGE -->
+        <section class="page active" id="page-dashboard">
+            <div class="page-header">
+                <h1 class="page-title">📊 Tổng quan quản trị</h1>
+                <p class="page-desc">Thống kê tổng hợp hệ thống cá cược</p>
+            </div>
+            <div class="admin-bets-summary" id="dashboard-stats"></div>
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📋 Cược gần đây</h2>
+                </div>
+                <div class="admin-odds-list" id="dashboard-recent-bets"></div>
+            </div>
+        </section>
+
+        <!-- MATCH ODDS PAGE -->
+        <section class="page" id="page-match-odds">
+            <div class="page-header">
+                <h1 class="page-title">⚽ Quản lý cược trận đấu</h1>
+                <p class="page-desc">Chỉnh sửa tỷ lệ 1X2 cho từng trận</p>
+            </div>
+            <div class="admin-toolbar">
+                <div class="admin-search">
+                    <input type="text" id="admin-search-match" placeholder="🔍 Tìm trận đấu...">
+                </div>
+                <div class="admin-actions">
+                    <button class="btn btn-sm btn-outline" id="admin-reset-match">🔄 Reset tất cả</button>
+                    <button class="btn btn-sm btn-primary" id="admin-save-match">💾 Lưu thay đổi</button>
+                </div>
+            </div>
+            <div class="admin-odds-list" id="admin-match-list"></div>
+        </section>
+
+        <!-- CHAMP ODDS PAGE -->
+        <section class="page" id="page-champ-odds">
+            <div class="page-header">
+                <h1 class="page-title">🏆 Quản lý cược vô địch</h1>
+                <p class="page-desc">Chỉnh sửa tỷ lệ cược cho đội vô địch</p>
+            </div>
+            <div class="admin-toolbar">
+                <div class="admin-actions">
+                    <button class="btn btn-sm btn-outline" id="admin-reset-champ">🔄 Reset</button>
+                    <button class="btn btn-sm btn-primary" id="admin-save-champ">💾 Lưu thay đổi</button>
+                </div>
+            </div>
+            <div class="admin-odds-grid" id="admin-champ-list"></div>
+        </section>
+
+        <!-- SPECIAL ODDS PAGE -->
+        <section class="page" id="page-special-odds">
+            <div class="page-header">
+                <h1 class="page-title">🎭 Quản lý cược đặc biệt</h1>
+                <p class="page-desc">Chỉnh sửa tỷ lệ cược đặc biệt</p>
+            </div>
+            <div class="admin-toolbar">
+                <div class="admin-actions">
+                    <button class="btn btn-sm btn-outline" id="admin-reset-special">🔄 Reset</button>
+                    <button class="btn btn-sm btn-primary" id="admin-save-special">💾 Lưu thay đổi</button>
+                </div>
+            </div>
+            <div class="admin-odds-list" id="admin-special-list"></div>
+        </section>
+
+        <!-- USER BETS PAGE -->
+        <section class="page" id="page-user-bets">
+            <div class="page-header">
+                <h1 class="page-title">📋 Quản lý cược người dùng</h1>
+                <p class="page-desc">Xem, chỉnh sửa và quản lý tất cả cược</p>
+            </div>
+            <div class="admin-toolbar">
+                <div class="admin-search">
+                    <input type="text" id="admin-search-bets" placeholder="🔍 Tìm theo tên hoặc đội...">
+                </div>
+                <div class="admin-actions">
+                    <button class="btn btn-sm btn-red" id="admin-clear-bets">🗑️ Xóa tất cả cược</button>
+                </div>
+            </div>
+            <div class="admin-bets-summary" id="admin-bets-summary"></div>
+            <div class="admin-odds-list" id="admin-bets-list"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="logo-icon">⚙️</span>
+                <span>WC2026 ADMIN</span>
+            </div>
+            <p class="footer-text">
+                Trang quản trị nội bộ - Chỉ dành cho người quản lý.<br>
+                © 2026 Internal Use Only.
+            </p>
+        </div>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
